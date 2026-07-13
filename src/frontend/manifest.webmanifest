@@ -1,0 +1,19 @@
+{
+  "name": "CTR Studio V2 Public",
+  "short_name": "CTR Studio V2",
+  "description": "Build your show, then go live — a local-first public radio studio.",
+  "start_url": "/studio.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090a0c",
+  "theme_color": "#090a0c",
+  "icons": [
+    {
+      "src": "ctr-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

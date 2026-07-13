@@ -1,0 +1,28 @@
+{
+  "name": "ctr-studio",
+  "version": "2.0.0-alpha.1",
+  "description": "CTR Studio V2 Public - a local-first show builder and live radio workspace.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node scripts/start-electron.js",
+    "dev": "node src/backend/server.js",
+    "test": "node scripts/ci-smoke.js"
+  },
+  "keywords": [
+    "radio",
+    "broadcast",
+    "dj",
+    "automation",
+    "public",
+    "local-first",
+    "pwa",
+    "show-rundown"
+  ],
+  "author": "Ground Xero Music Australia",
+  "license": "MPL-2.0",
+  "type": "commonjs",
+  "dependencies": {
+    "electron": "^42.2.0",
+    "express": "^5.2.1"
+  }
+}

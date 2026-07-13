@@ -1,0 +1,17 @@
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.env
+.vercel/
+.DS_Store
+uploads/
+dist/
+coverage/
+.vscode/
+.idea/
+*.log
+data/admin.json
+data/overlay-token.txt
+.vercel
+.env*
