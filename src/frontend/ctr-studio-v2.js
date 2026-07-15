@@ -1,7 +1,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const DB_NAME = 'ctr-studio-v2';
-  const state = { tracks: [], queue: [], sortAsc: true, active: 'A', auto: false, importing: false, context: null, master: null, mic: null, sessionStarted: null, installPrompt: null };
+  const state = { tracks: [], queue: [], sortAsc: true, active: 'A', auto: false, shuffle: localStorage.getItem('ctr-v2-shuffle') === 'true', importing: false, context: null, master: null, mic: null, sessionStarted: null, installPrompt: null };
   const decks = { A: makeDeck('A'), B: makeDeck('B') };
 
   function makeDeck(name) {
@@ -122,14 +122,27 @@
   function updateNowPlaying() { const deck = decks[state.active]; $('nowTitle').textContent = deck.track?.title || 'Nothing playing'; $('nowMeta').textContent = deck.track ? `${deck.track.artist} · Deck ${state.active}` : 'Load a track to either deck'; }
   function updateCrossfader() { if (!decks.A.gain) return; const x = +$('crossfader').value / 100; decks.A.gain.gain.value = Math.cos(x * Math.PI / 2); decks.B.gain.gain.value = Math.sin(x * Math.PI / 2); $('mixBtn').textContent = x < .5 ? 'MIX TO B' : 'MIX TO A'; }
   function performMix() { const target = +$('crossfader').value < 50 ? 100 : 0, start = +$('crossfader').value, began = performance.now(); const tick = now => { const amount = Math.min(1, (now - began) / 2200); $('crossfader').value = start + (target - start) * amount; updateCrossfader(); if (amount < 1) requestAnimationFrame(tick); else { state.active = target ? 'B' : 'A'; updateNowPlaying(); } }; requestAnimationFrame(tick); }
-  function adjacentTrack(deck, step) { const pool = state.queue.length ? state.queue.map(getTrack) : state.tracks; if (!pool.length) return; const index = Math.max(0, pool.findIndex(track => track?.id === deck.track?.id)); loadDeck(deck.name, pool[(index + step + pool.length) % pool.length]); }
+  function playbackPool() { return (state.queue.length ? state.queue.map(getTrack) : state.tracks).filter(Boolean); }
+  function nextTrack(currentId, random = state.shuffle) {
+    const pool = playbackPool(); if (!pool.length) return null;
+    const loadedIds = new Set(Object.values(decks).map(deck => deck.track?.id).filter(Boolean));
+    let candidates = pool.filter(track => track.id !== currentId && !loadedIds.has(track.id));
+    if (!candidates.length) candidates = pool.filter(track => track.id !== currentId);
+    if (!candidates.length) return pool[0];
+    if (random) return candidates[Math.floor(Math.random() * candidates.length)];
+    const index = Math.max(-1, pool.findIndex(track => track.id === currentId));
+    return pool.slice(index + 1).find(track => candidates.some(candidate => candidate.id === track.id)) || candidates[0];
+  }
+  function adjacentTrack(deck, step) {
+    const pool = playbackPool(); if (!pool.length) return;
+    if (step > 0) return loadDeck(deck.name, nextTrack(deck.track?.id));
+    const index = Math.max(0, pool.findIndex(track => track.id === deck.track?.id)); loadDeck(deck.name, pool[(index - 1 + pool.length) % pool.length]);
+  }
   async function ended(name) {
     updateDeck(name); if (!state.auto) return;
-    const pool = state.queue.length ? state.queue.map(getTrack) : state.tracks;
-    if (!pool.length) return;
-    const currentIndex = Math.max(0, pool.findIndex(track => track?.id === decks[name].track?.id));
+    const track = nextTrack(decks[name].track?.id); if (!track) return;
     const next = name === 'A' ? 'B' : 'A';
-    loadDeck(next, pool[(currentIndex + 1) % pool.length]); await toggleDeck(next); performMix();
+    loadDeck(next, track); await toggleDeck(next); performMix();
   }
 
   async function toggleMic() {
@@ -147,6 +160,7 @@
   $('clearLibraryBtn').onclick = async () => { if (!state.tracks.length || !confirm('Clear every locally saved track and the show rundown?')) return; Object.values(decks).forEach(deck => { deck.audio.pause(); if (deck.track?.url) URL.revokeObjectURL(deck.track.url); deck.track = null; updateDeck(deck.name); }); await dbClear(); state.tracks = []; state.queue = []; updateNowPlaying(); saveQueue(); toast('Local library cleared'); };
   $('queueList').onclick = event => { const item = event.target.closest('.queue-item'); if (item && event.target.closest('[data-remove-queue]')) { state.queue.splice(+item.dataset.index, 1); saveQueue(); } };
   let dragged = null; $('queueList').ondragstart = event => { dragged = +event.target.closest('.queue-item')?.dataset.index; }; $('queueList').ondragover = event => event.preventDefault(); $('queueList').ondrop = event => { event.preventDefault(); const target = +event.target.closest('.queue-item')?.dataset.index; if (Number.isInteger(dragged) && Number.isInteger(target) && dragged !== target) { const [id] = state.queue.splice(dragged, 1); state.queue.splice(target, 0, id); saveQueue(); } dragged = null; };
+  $('shuffleQueueBtn').onclick = () => { for (let index = state.queue.length - 1; index > 0; index--) { const swap = Math.floor(Math.random() * (index + 1)); [state.queue[index], state.queue[swap]] = [state.queue[swap], state.queue[index]]; } saveQueue(); toast(state.queue.length > 1 ? 'Rundown shuffled' : 'Add at least two tracks to shuffle'); };
   $('clearQueueBtn').onclick = () => { state.queue = []; saveQueue(); }; $('openLiveBtn').onclick = () => showView('live');
   $('showName').oninput = event => { const name = event.target.textContent.trim() || 'Untitled show'; localStorage.setItem('ctr-v2-show-name', name); $('liveShowName').textContent = name; };
   $('liveQueue').onclick = event => { const item = event.target.closest('[data-live-load]'); if (!item) return; const destination = !decks.A.track ? 'A' : !decks.B.track ? 'B' : state.active === 'A' ? 'B' : 'A'; loadDeck(destination, getTrack(item.dataset.liveLoad)); };
@@ -155,6 +169,7 @@
   ['A', 'B'].forEach(name => $(`progress${name}`).oninput = event => { const audio = decks[name].audio; if (audio.duration) audio.currentTime = +event.target.value / 1000 * audio.duration; });
   $('crossfader').oninput = updateCrossfader; $('mixBtn').onclick = performMix; $('master').oninput = event => { ensureAudio(); state.master.gain.value = +event.target.value / 100; $('masterValue').textContent = `${event.target.value}%`; };
   $('autoBtn').onclick = () => { state.auto = !state.auto; $('autoBtn').classList.toggle('active', state.auto); $('autoBtn').querySelector('b').textContent = state.auto ? 'ON' : 'OFF'; };
+  $('shuffleBtn').onclick = () => { state.shuffle = !state.shuffle; localStorage.setItem('ctr-v2-shuffle', String(state.shuffle)); $('shuffleBtn').classList.toggle('active', state.shuffle); $('shuffleBtn').querySelector('b').textContent = state.shuffle ? 'ON' : 'OFF'; toast(`Shuffle ${state.shuffle ? 'on' : 'off'}`); };
   $('micBtn').onclick = toggleMic; $('helpBtn').onclick = () => $('helpDialog').showModal();
 
   window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); state.installPrompt = event; $('installBtn').hidden = false; });
@@ -164,7 +179,7 @@
   if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js').catch(() => {}));
 
   async function init() {
-    updateConnection(); const savedName = localStorage.getItem('ctr-v2-show-name') || 'Untitled show'; $('showName').textContent = savedName; $('liveShowName').textContent = savedName;
+    updateConnection(); const savedName = localStorage.getItem('ctr-v2-show-name') || 'Untitled show'; $('showName').textContent = savedName; $('liveShowName').textContent = savedName; $('shuffleBtn').classList.toggle('active', state.shuffle); $('shuffleBtn').querySelector('b').textContent = state.shuffle ? 'ON' : 'OFF';
     try { state.tracks = await dbAll(); } catch { toast('Local library is unavailable in this browser'); }
     try { state.queue = JSON.parse(localStorage.getItem('ctr-v2-rundown')) || []; } catch { state.queue = []; }
     await requestPersistence(); renderAll();

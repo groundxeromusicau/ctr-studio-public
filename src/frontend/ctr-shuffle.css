@@ -1,0 +1,23 @@
+.queue-foot > div {
+  display: flex;
+  gap: 7px;
+}
+
+.queue-foot button {
+  font-size: 8px;
+}
+
+.live-head {
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+}
+
+@media (max-width: 800px) {
+  .live-head {
+    grid-template-columns: 1fr auto auto;
+  }
+
+  .live-head > div:first-child {
+    grid-column: 1 / -1;
+  }
+}

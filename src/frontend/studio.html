@@ -9,6 +9,7 @@
   <link rel="icon" href="ctr-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="ctr-studio-v2.css">
+  <link rel="stylesheet" href="ctr-shuffle.css">
 </head>
 <body>
   <div class="app-shell">
@@ -24,7 +25,7 @@
         <button class="rail-item" type="button" data-view-target="rundown"><i>≡</i><span>Rundown</span><b id="queueBadge">0</b></button>
         <button class="rail-item" type="button" data-view-target="live"><i>◉</i><span>Live desk</span></button>
       </nav>
-      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 · ALPHA 2</small></div>
+      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 · ALPHA 3</small></div>
     </aside>
 
     <main class="stage">
@@ -61,7 +62,7 @@
           <section class="queue panel">
             <div class="panel-head"><div><span>NEXT UP</span><h2 id="showName" contenteditable="true" spellcheck="false">Untitled show</h2></div><div><b id="queueDuration">0:00</b><small>TOTAL RUNTIME</small></div></div>
             <ol id="queueList" class="queue-list"><li class="empty-state"><i>≡</i><h2>No tracks in your rundown</h2><p>Add music from the library, then drag it into show order.</p><button type="button" data-go-library>Browse library</button></li></ol>
-            <div class="queue-foot"><button id="clearQueueBtn" class="quiet danger" type="button">Clear rundown</button><span>Changes save automatically</span></div>
+            <div class="queue-foot"><div><button id="shuffleQueueBtn" class="quiet" type="button">⌘ Shuffle rundown</button><button id="clearQueueBtn" class="quiet danger" type="button">Clear rundown</button></div><span>Changes save automatically</span></div>
           </section>
           <aside class="show-aside">
             <section class="panel show-card"><span>SHOW CLOCK</span><b id="showClock">00:00:00</b><i></i><small>ESTIMATED END</small><strong id="estimatedEnd">—</strong></section>
@@ -71,7 +72,7 @@
       </section>
 
       <section class="view live-view" id="liveView" data-view="live">
-        <div class="live-head"><div><span class="kicker">03 / LIVE DESK</span><h1 id="liveShowName">Untitled show</h1></div><div class="on-air-state"><i></i><span>STANDBY</span><time id="sessionTimer">00:00:00</time></div><button id="autoBtn" type="button">AUTO DJ <b>OFF</b></button></div>
+        <div class="live-head"><div><span class="kicker">03 / LIVE DESK</span><h1 id="liveShowName">Untitled show</h1></div><div class="on-air-state"><i></i><span>STANDBY</span><time id="sessionTimer">00:00:00</time></div><button id="shuffleBtn" type="button">SHUFFLE <b>OFF</b></button><button id="autoBtn" type="button">AUTO DJ <b>OFF</b></button></div>
         <div class="now-strip"><span>NOW PLAYING</span><b id="nowTitle">Nothing playing</b><em id="nowMeta">Load a track to either deck</em><div class="meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
         <div class="desk-grid">
           <article class="deck panel" data-deck="A">

@@ -2,7 +2,7 @@
 
 **Build your show. Then go live.**
 
-CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.0 Alpha 2**. It combines a persistent music library, show rundown, two-deck live desk, microphone input, and automatic playback in an installable web application.
+CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.0 Alpha 3**. It combines a persistent music library, show rundown, two-deck live desk, microphone input, shuffle playback, and automatic playback in an installable web application.
 
 [Open the public website](https://crazytalkradio-studio.vercel.app/) · [Launch the studio](https://crazytalkradio-studio.vercel.app/studio.html)
 
@@ -21,6 +21,7 @@ Browser storage is not a replacement for the original music files or a separate 
 - Equal-power crossfader and master volume
 - One-button automatic transitions
 - Continuous Auto DJ playback
+- Persistent shuffle playback and one-click rundown randomisation
 - Live microphone input
 - Session clock and now-playing information
 - Installable progressive web application
