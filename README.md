@@ -1,8 +1,8 @@
-# CTR Studio V2 Public
+# CTR Studio Open — Version 2.0 Alpha
 
 **Build your show. Then go live.**
 
-CTR Studio V2 Public is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. It combines a persistent music library, show rundown, two-deck live desk, microphone input, and automatic playback in an installable web application.
+CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.0 Alpha 2**. It combines a persistent music library, show rundown, two-deck live desk, microphone input, and automatic playback in an installable web application.
 
 [Open the public website](https://crazytalkradio-studio.vercel.app/) · [Launch the studio](https://crazytalkradio-studio.vercel.app/studio.html)
 
@@ -12,7 +12,7 @@ Your imported audio remains in browser storage on your device. CTR Studio does n
 
 Browser storage is not a replacement for the original music files or a separate backup. Users can clear it through browser settings, private browsing is temporary, and storage policies vary between browsers.
 
-## V2 Public features
+## Open features
 
 - Persistent on-device music library using IndexedDB
 - Searchable and sortable track collection
@@ -86,7 +86,7 @@ Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_
 
 ## Public and paid editions
 
-This repository contains CTR Studio V2 Public. Future paid-edition services, private infrastructure, and proprietary modules are not part of this repository or the public licence grant.
+This repository contains CTR Studio Open. CTR Studio Pro services, private infrastructure, and proprietary modules are not part of this repository or the public licence grant.
 
 ## Licence and trademarks
 

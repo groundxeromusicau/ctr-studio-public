@@ -1,7 +1,7 @@
 {
-  "name": "CTR Studio V2 Public",
-  "short_name": "CTR Studio V2",
-  "description": "Build your show, then go live — a local-first public radio studio.",
+  "name": "CTR Studio Open",
+  "short_name": "CTR Open",
+  "description": "Build your show, then go live — a local-first open-source radio studio.",
   "start_url": "/studio.html",
   "scope": "/",
   "display": "standalone",

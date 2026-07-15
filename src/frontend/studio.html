@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#0a0b0d">
-  <meta name="description" content="CTR Studio V2 Public — build your show, then go live.">
-  <title>CTR Studio V2 Public</title>
+  <meta name="description" content="CTR Studio Open — build your show, then go live.">
+  <title>CTR Studio Open</title>
   <link rel="icon" href="ctr-icon.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="ctr-studio-v2.css">
@@ -13,7 +13,7 @@
 <body>
   <div class="app-shell">
     <header class="appbar">
-      <a class="brand" href="/" aria-label="CTR Studio website"><img src="ctr-icon.svg" alt=""><div><strong>CTR STUDIO</strong><span>V2 / PUBLIC</span></div></a>
+      <a class="brand" href="/" aria-label="CTR Studio website"><img src="ctr-icon.svg" alt=""><div><strong>CTR STUDIO</strong><span>OPEN</span></div></a>
       <div class="signal-state"><i id="connectionDot"></i><span id="connectionLabel">LOCAL SESSION</span><b>ALL AUDIO STAYS ON THIS DEVICE</b></div>
       <div class="app-actions"><time id="clock">00:00:00</time><button id="installBtn" class="install-btn" type="button" hidden>Install app</button><button id="helpBtn" class="icon-btn" type="button" aria-label="Open help">?</button></div>
     </header>
@@ -24,7 +24,7 @@
         <button class="rail-item" type="button" data-view-target="rundown"><i>≡</i><span>Rundown</span><b id="queueBadge">0</b></button>
         <button class="rail-item" type="button" data-view-target="live"><i>◉</i><span>Live desk</span></button>
       </nav>
-      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 ALPHA</small></div>
+      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 · ALPHA 2</small></div>
     </aside>
 
     <main class="stage">
@@ -101,7 +101,7 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <dialog id="helpDialog"><form method="dialog"><div><span>CTR STUDIO V2 PUBLIC</span><button value="close" aria-label="Close">×</button></div><h2>Build your show, then go live.</h2><ol><li>Import local audio into your persistent library.</li><li>Add tracks to the rundown and arrange the order.</li><li>Open the Live Desk and load either deck.</li><li>Mix manually or turn on Auto DJ.</li></ol><p>Your library is stored only in this browser on this device.</p><button class="primary" value="close">Got it</button></form></dialog>
+  <dialog id="helpDialog"><form method="dialog"><div><span>CTR STUDIO OPEN · VERSION 2.0</span><button value="close" aria-label="Close">×</button></div><h2>Build your show, then go live.</h2><ol><li>Import local audio into your persistent library.</li><li>Add tracks to the rundown and arrange the order.</li><li>Open the Live Desk and load either deck.</li><li>Mix manually or turn on Auto DJ.</li></ol><p>Your library is stored only in this browser on this device.</p><button class="primary" value="close">Got it</button></form></dialog>
   <script src="ctr-studio-v2.js"></script>
 </body>
 </html>
