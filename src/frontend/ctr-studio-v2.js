@@ -1,7 +1,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const DB_NAME = 'ctr-studio-v2';
-  const state = { tracks: [], queue: [], sortAsc: true, active: 'A', auto: false, context: null, master: null, mic: null, sessionStarted: null, installPrompt: null };
+  const state = { tracks: [], queue: [], sortAsc: true, active: 'A', auto: false, importing: false, context: null, master: null, mic: null, sessionStarted: null, installPrompt: null };
   const decks = { A: makeDeck('A'), B: makeDeck('B') };
 
   function makeDeck(name) {
@@ -29,6 +29,24 @@
   function getTrack(id) { return state.tracks.find(track => track.id === id); }
   function saveQueue() { localStorage.setItem('ctr-v2-rundown', JSON.stringify(state.queue)); renderAll(); }
   function toast(message) { $('toast').textContent = message; $('toast').classList.add('show'); clearTimeout(toast.timer); toast.timer = setTimeout(() => $('toast').classList.remove('show'), 2600); }
+  function nextPaint() { return new Promise(resolve => requestAnimationFrame(() => resolve())); }
+  function fileSize(bytes) { return bytes >= 1048576 ? `${(bytes / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`; }
+  function importProgress(index, total, file, phase, fraction) {
+    const panel = $('importProgress'); const percent = Math.round((index + fraction) / total * 100);
+    panel.hidden = false; panel.classList.remove('complete', 'error'); panel.setAttribute('aria-busy', 'true');
+    $('importProgressLabel').textContent = `Track ${index + 1} of ${total} · ${phase}`;
+    $('importProgressValue').textContent = `${percent}%`; $('importProgressFill').style.width = `${percent}%`;
+    $('importProgressBar').setAttribute('aria-valuenow', String(percent)); $('importProgressFile').textContent = `${file.name} · ${fileSize(file.size)}`;
+    $('importBtn').innerHTML = `<span>${index + 1}/${total}</span> Importing`;
+  }
+  function finishImportProgress(saved, failed) {
+    const panel = $('importProgress'); const complete = failed === 0;
+    panel.setAttribute('aria-busy', 'false'); panel.classList.add(complete ? 'complete' : 'error');
+    $('importProgressLabel').textContent = complete ? `${saved} track${saved === 1 ? '' : 's'} ready` : `${saved} saved · ${failed} failed`;
+    $('importProgressValue').textContent = complete ? 'DONE' : 'CHECK'; $('importProgressFill').style.width = '100%'; $('importProgressBar').setAttribute('aria-valuenow', '100');
+    $('importProgressFile').textContent = complete ? 'Saved safely in this browser' : 'Some files could not be stored on this device';
+    clearTimeout(finishImportProgress.timer); finishImportProgress.timer = setTimeout(() => { panel.hidden = true; panel.classList.remove('complete', 'error'); }, 2200);
+  }
 
   async function fileDuration(file) {
     return new Promise(resolve => {
@@ -41,14 +59,21 @@
   async function importFiles(files) {
     const audioFiles = [...files].filter(file => file.type.startsWith('audio/'));
     if (!audioFiles.length) return toast('No supported audio files selected');
-    $('importBtn').disabled = true; $('importBtn').textContent = 'Importing…';
-    for (const file of audioFiles) {
-      const names = parseName(file);
-      const track = { id: uid(), ...names, filename: file.name, duration: await fileDuration(file), size: file.size, type: file.type, blob: file, added: Date.now() };
-      await dbPut(track); state.tracks.push(track);
+    if (state.importing) return toast('The current import is still running');
+    state.importing = true; clearTimeout(finishImportProgress.timer); $('importBtn').disabled = true; $('importBtn').setAttribute('aria-busy', 'true'); let saved = 0; let failed = 0;
+    for (let index = 0; index < audioFiles.length; index++) {
+      const file = audioFiles[index]; let fileFailed = false;
+      try {
+        importProgress(index, audioFiles.length, file, 'Reading metadata', .08); await nextPaint();
+        const names = parseName(file); const duration = await fileDuration(file);
+        importProgress(index, audioFiles.length, file, 'Saving on this device', .62); await nextPaint();
+        const track = { id: uid(), ...names, filename: file.name, duration, size: file.size, type: file.type, blob: file, added: Date.now() };
+        await dbPut(track); state.tracks.push(track); saved++;
+      } catch { failed++; fileFailed = true; }
+      importProgress(index, audioFiles.length, file, fileFailed ? 'Could not save · continuing' : 'Ready', 1); await nextPaint();
     }
-    $('importBtn').disabled = false; $('importBtn').innerHTML = '<span>＋</span> Import audio';
-    await requestPersistence(); renderAll(); toast(`${audioFiles.length} track${audioFiles.length === 1 ? '' : 's'} saved on this device`);
+    state.importing = false; $('importBtn').disabled = false; $('importBtn').removeAttribute('aria-busy'); $('importBtn').innerHTML = '<span>＋</span> Import audio'; finishImportProgress(saved, failed);
+    await requestPersistence(); renderAll(); toast(failed ? `${saved} saved · ${failed} could not be imported` : `${saved} track${saved === 1 ? '' : 's'} saved on this device`);
   }
 
   function renderLibrary() {
@@ -115,8 +140,8 @@
   async function requestPersistence() { if (navigator.storage?.persist) { const persistent = await navigator.storage.persist(); $('storageState').textContent = persistent ? 'DATA PROTECTED' : 'LOCAL DATA'; } }
 
   document.querySelectorAll('[data-view-target]').forEach(button => button.onclick = () => showView(button.dataset.viewTarget));
-  document.addEventListener('click', event => { if (event.target.closest('[data-import]')) $('audioInput').click(); if (event.target.closest('[data-go-library]')) showView('library'); if (event.target.closest('[data-go-rundown]')) showView('rundown'); });
-  $('importBtn').onclick = () => $('audioInput').click(); $('audioInput').onchange = event => importFiles(event.target.files); $('searchInput').oninput = renderLibrary;
+  document.addEventListener('click', event => { if (event.target.closest('[data-import]') && !state.importing) $('audioInput').click(); if (event.target.closest('[data-go-library]')) showView('library'); if (event.target.closest('[data-go-rundown]')) showView('rundown'); });
+  $('importBtn').onclick = () => $('audioInput').click(); $('audioInput').onchange = event => { importFiles(event.target.files); event.target.value = ''; }; $('searchInput').oninput = renderLibrary;
   $('sortBtn').onclick = () => { state.sortAsc = !state.sortAsc; $('sortBtn').textContent = state.sortAsc ? 'Title A–Z' : 'Title Z–A'; renderLibrary(); };
   $('trackList').onclick = event => { const row = event.target.closest('.track-row'); if (!row) return; const track = getTrack(row.dataset.id); const load = event.target.closest('[data-load]'); if (load) loadDeck(load.dataset.load, track); if (event.target.closest('[data-add-queue]')) { state.queue.push(track.id); saveQueue(); toast(`${track.title} added to rundown`); } };
   $('clearLibraryBtn').onclick = async () => { if (!state.tracks.length || !confirm('Clear every locally saved track and the show rundown?')) return; Object.values(decks).forEach(deck => { deck.audio.pause(); if (deck.track?.url) URL.revokeObjectURL(deck.track.url); deck.track = null; updateDeck(deck.name); }); await dbClear(); state.tracks = []; state.queue = []; updateNowPlaying(); saveQueue(); toast('Local library cleared'); };

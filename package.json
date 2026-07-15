@@ -1,6 +1,6 @@
 {
   "name": "ctr-studio",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-alpha.2",
   "description": "CTR Studio V2 Public - a local-first show builder and live radio workspace.",
   "main": "main.js",
   "scripts": {

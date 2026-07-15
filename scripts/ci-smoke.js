@@ -20,10 +20,12 @@ function expect(value, message) { if (!value) throw new Error(message); }
 
 async function run() {
   for (let attempt = 0; attempt < 30; attempt++) { try { await request('/api/health'); break; } catch { await new Promise(resolve => setTimeout(resolve, 100)); } }
-  const health = await request('/api/health'); expect(health.status === 200, 'health endpoint failed'); expect(JSON.parse(health.body).product === 'CTR Studio V2 Public', 'wrong product identity');
+  const health = await request('/api/health'); expect(health.status === 200, 'health endpoint failed'); const identity = JSON.parse(health.body); expect(identity.product === 'CTR Studio V2 Public', 'wrong product identity'); expect(identity.version === '2.0.0-alpha.2', 'wrong Open release version');
   const home = await request('/'); expect(home.status === 200, 'home page failed'); expect(home.body.includes('<title>CTR Studio V2 — Build Your Show. Go Live.</title>'), 'V2 website title missing');
   expect(home.body.includes('id="v3"'), 'V3 preview teaser missing'); expect(home.body.includes('crazytalkradio-studio-restrictedmusic-rickie-drayton-s-projects.vercel.app/login?next=/studio'), 'stable V3 login link missing'); expect(home.body.includes('INVITE-ONLY TESTING'), 'V3 access expectation missing');
   const studio = await request('/studio.html'); expect(studio.status === 200, 'studio page failed'); expect(studio.body.includes('<title>CTR Studio V2 Public</title>'), 'V2 studio title missing');
+  expect(studio.body.includes('id="importProgress"') && studio.body.includes('role="progressbar"'), 'accessible import progress UI missing');
+  const studioScript = await request('/ctr-studio-v2.js'); expect(studioScript.body.includes("'Reading metadata'") && studioScript.body.includes("'Saving on this device'"), 'per-track import phases missing');
   for (const asset of ['/ctr-v2-site.css', '/ctr-studio-v2.css', '/ctr-studio-v2.js', '/service-worker.js', '/ctr-icon.svg', '/manifest.webmanifest']) { const response = await request(asset); expect(response.status === 200, `${asset} failed`); }
   const unknown = await request('/not-a-v2-asset.js'); expect(unknown.body.includes('<title>CTR Studio V2 — Build Your Show. Go Live.</title>'), 'unknown routes should return the V2 website');
   console.log('CTR Studio V2 Public smoke test passed');

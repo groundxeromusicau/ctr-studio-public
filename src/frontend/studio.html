@@ -31,9 +31,14 @@
       <section class="view active" id="libraryView" data-view="library">
         <div class="view-head">
           <div><span class="kicker">01 / YOUR SOUND</span><h1>Music library</h1><p>Import once. Build shows whenever inspiration hits.</p></div>
-          <button class="primary" id="importBtn" type="button"><span>＋</span> Import audio</button>
+          <button class="primary" id="importBtn" type="button" aria-describedby="importProgress"><span>＋</span> Import audio</button>
           <input id="audioInput" type="file" accept="audio/*" multiple hidden>
         </div>
+        <section class="import-progress panel" id="importProgress" aria-live="polite" aria-busy="false" hidden>
+          <div class="import-progress-head"><div><span>LOCAL IMPORT</span><b id="importProgressLabel">Preparing audio…</b></div><strong id="importProgressValue">0%</strong></div>
+          <div class="import-progress-track" id="importProgressBar" role="progressbar" aria-label="Track import progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="importProgressFill"></i></div>
+          <small id="importProgressFile">Waiting for selected files</small>
+        </section>
         <div class="stat-row">
           <article><span>TRACKS</span><b id="trackStat">0</b></article>
           <article><span>PLAY TIME</span><b id="durationStat">0h 00m</b></article>
