@@ -1,7 +1,8 @@
 (() => {
   const $ = id => document.getElementById(id);
   const DB_NAME = 'ctr-studio-v2';
-  const state = { tracks: [], queue: [], sortAsc: true, active: 'A', auto: false, shuffle: localStorage.getItem('ctr-v2-shuffle') === 'true', importing: false, context: null, master: null, mic: null, sessionStarted: null, installPrompt: null };
+  const AUDIO_FILE_EXTENSION = /\.(mp3|m4a|aac|wav|wave|aif|aiff|flac|ogg|oga|opus|weba)$/i;
+  const state = { tracks: [], queue: [], selectedTracks: new Set(), sortAsc: true, active: 'A', auto: false, shuffle: localStorage.getItem('ctr-v2-shuffle') === 'true', importing: false, context: null, master: null, mic: null, sessionStarted: null, installPrompt: null };
   const decks = { A: makeDeck('A'), B: makeDeck('B') };
 
   function makeDeck(name) {
@@ -57,10 +58,10 @@
   }
 
   async function importFiles(files) {
-    const audioFiles = [...files].filter(file => file.type.startsWith('audio/'));
-    if (!audioFiles.length) return toast('No supported audio files selected');
+    const audioFiles = [...files].filter(file => file.type.startsWith('audio/') || AUDIO_FILE_EXTENSION.test(file.name));
+    if (!audioFiles.length) return toast('Choose audio from Files: MP3, M4A, AAC, WAV, AIFF, FLAC, OGG or Opus');
     if (state.importing) return toast('The current import is still running');
-    state.importing = true; clearTimeout(finishImportProgress.timer); $('importBtn').disabled = true; $('importBtn').setAttribute('aria-busy', 'true'); let saved = 0; let failed = 0;
+    state.importing = true; clearTimeout(finishImportProgress.timer); $('importBtn').disabled = true; $('importFolderBtn').disabled = true; $('importBtn').setAttribute('aria-busy', 'true'); let saved = 0; let failed = 0;
     for (let index = 0; index < audioFiles.length; index++) {
       const file = audioFiles[index]; let fileFailed = false;
       try {
@@ -72,18 +73,39 @@
       } catch { failed++; fileFailed = true; }
       importProgress(index, audioFiles.length, file, fileFailed ? 'Could not save · continuing' : 'Ready', 1); await nextPaint();
     }
-    state.importing = false; $('importBtn').disabled = false; $('importBtn').removeAttribute('aria-busy'); $('importBtn').innerHTML = '<span>＋</span> Import audio'; finishImportProgress(saved, failed);
+    state.importing = false; $('importBtn').disabled = false; $('importFolderBtn').disabled = false; $('importBtn').removeAttribute('aria-busy'); $('importBtn').innerHTML = '<span>＋</span> Import audio'; finishImportProgress(saved, failed);
     await requestPersistence(); renderAll(); toast(failed ? `${saved} saved · ${failed} could not be imported` : `${saved} track${saved === 1 ? '' : 's'} saved on this device`);
   }
 
-  function renderLibrary() {
+  function visibleTracks() {
     const query = $('searchInput').value.trim().toLowerCase();
-    const tracks = [...state.tracks].sort((a, b) => a.title.localeCompare(b.title) * (state.sortAsc ? 1 : -1)).filter(track => `${track.title} ${track.artist}`.toLowerCase().includes(query));
-    $('trackList').innerHTML = tracks.length ? tracks.map((track, index) => `<div class="track-row" data-id="${track.id}"><span>${String(index + 1).padStart(2, '0')}</span><div class="track-title"><b>${escapeHtml(track.title)}</b><small>${escapeHtml(track.filename)}</small></div><span class="track-artist">${escapeHtml(track.artist)}</span><span class="track-time">${formatTime(track.duration)}</span><div class="track-actions"><button data-load="A" title="Load Deck A">A</button><button data-load="B" title="Load Deck B">B</button><button class="add" data-add-queue>+ SHOW</button></div></div>`).join('') : `<div class="empty-state"><i>♫</i><h2>${state.tracks.length ? 'No tracks found' : 'Your library is quiet'}</h2><p>${state.tracks.length ? 'Try another title or artist.' : 'Import MP3, WAV, M4A or other browser-supported audio.'}</p>${state.tracks.length ? '' : '<button type="button" data-import>Choose audio files</button>'}</div>`;
+    return [...state.tracks].sort((a, b) => a.title.localeCompare(b.title) * (state.sortAsc ? 1 : -1)).filter(track => `${track.title} ${track.artist}`.toLowerCase().includes(query));
+  }
+
+  function renderLibrary() {
+    const tracks = visibleTracks(), trackIds = new Set(state.tracks.map(track => track.id));
+    for (const id of state.selectedTracks) if (!trackIds.has(id)) state.selectedTracks.delete(id);
+    const selectedVisible = tracks.filter(track => state.selectedTracks.has(track.id)).length;
+    $('selectAllBtn').disabled = tracks.length === 0; $('selectAllBtn').textContent = tracks.length && selectedVisible === tracks.length ? 'Deselect all' : 'Select all';
+    $('addSelectedBtn').disabled = state.selectedTracks.size === 0; $('addSelectedBtn').textContent = state.selectedTracks.size ? `Add ${state.selectedTracks.size} to rundown` : 'Add selected to rundown';
+    $('trackList').innerHTML = tracks.length ? tracks.map((track, index) => `<div class="track-row ${state.selectedTracks.has(track.id) ? 'selected' : ''}" data-id="${track.id}"><label class="track-select"><input type="checkbox" data-select-track="${track.id}" ${state.selectedTracks.has(track.id) ? 'checked' : ''}><span>${String(index + 1).padStart(2, '0')}</span></label><div class="track-title"><b>${escapeHtml(track.title)}</b><small>${escapeHtml(track.filename)}</small></div><span class="track-artist">${escapeHtml(track.artist)}</span><span class="track-time">${formatTime(track.duration)}</span><div class="track-actions"><button data-load="A" title="Load Deck A">A</button><button data-load="B" title="Load Deck B">B</button><button class="add" data-add-queue>+ SHOW</button></div></div>`).join('') : `<div class="empty-state"><i>♫</i><h2>${state.tracks.length ? 'No tracks found' : 'Your library is quiet'}</h2><p>${state.tracks.length ? 'Try another title or artist.' : 'Import MP3, WAV, M4A or other browser-supported audio.'}</p>${state.tracks.length ? '' : '<button type="button" data-import>Choose audio files</button>'}</div>`;
     const total = state.tracks.reduce((sum, track) => sum + (track.duration || 0), 0);
     const bytes = state.tracks.reduce((sum, track) => sum + (track.size || 0), 0);
     $('trackStat').textContent = state.tracks.length; $('durationStat').textContent = formatHours(total); $('sizeStat').textContent = `${(bytes / 1048576).toFixed(bytes > 10485760 ? 0 : 1)} MB`;
     navigator.storage?.estimate().then(({ usage = 0, quota = 1 }) => $('storageBar').style.width = `${Math.min(100, usage / quota * 100)}%`).catch(() => {});
+  }
+
+  function toggleSelectAll() {
+    const tracks = visibleTracks(), allSelected = tracks.length > 0 && tracks.every(track => state.selectedTracks.has(track.id));
+    for (const track of tracks) allSelected ? state.selectedTracks.delete(track.id) : state.selectedTracks.add(track.id);
+    renderLibrary();
+  }
+  function addSelectedToQueue() {
+    const ids = visibleTracks().filter(track => state.selectedTracks.has(track.id)).map(track => track.id);
+    const hiddenIds = state.tracks.filter(track => state.selectedTracks.has(track.id) && !ids.includes(track.id)).map(track => track.id);
+    ids.push(...hiddenIds);
+    if (!ids.length) return toast('Select tracks before adding the rundown');
+    state.queue.push(...ids); state.selectedTracks.clear(); saveQueue(); toast(`${ids.length} track${ids.length === 1 ? '' : 's'} added to the rundown`);
   }
 
   function renderQueue() {
@@ -154,10 +176,12 @@
 
   document.querySelectorAll('[data-view-target]').forEach(button => button.onclick = () => showView(button.dataset.viewTarget));
   document.addEventListener('click', event => { if (event.target.closest('[data-import]') && !state.importing) $('audioInput').click(); if (event.target.closest('[data-go-library]')) showView('library'); if (event.target.closest('[data-go-rundown]')) showView('rundown'); });
-  $('importBtn').onclick = () => $('audioInput').click(); $('audioInput').onchange = event => { importFiles(event.target.files); event.target.value = ''; }; $('searchInput').oninput = renderLibrary;
+  $('importBtn').onclick = () => $('audioInput').click(); $('importFolderBtn').onclick = () => $('folderInput').click(); for (const input of [$('audioInput'), $('folderInput')]) input.onchange = event => { importFiles(event.target.files); event.target.value = ''; }; $('searchInput').oninput = renderLibrary;
+  $('selectAllBtn').onclick = toggleSelectAll; $('addSelectedBtn').onclick = addSelectedToQueue;
   $('sortBtn').onclick = () => { state.sortAsc = !state.sortAsc; $('sortBtn').textContent = state.sortAsc ? 'Title A–Z' : 'Title Z–A'; renderLibrary(); };
   $('trackList').onclick = event => { const row = event.target.closest('.track-row'); if (!row) return; const track = getTrack(row.dataset.id); const load = event.target.closest('[data-load]'); if (load) loadDeck(load.dataset.load, track); if (event.target.closest('[data-add-queue]')) { state.queue.push(track.id); saveQueue(); toast(`${track.title} added to rundown`); } };
-  $('clearLibraryBtn').onclick = async () => { if (!state.tracks.length || !confirm('Clear every locally saved track and the show rundown?')) return; Object.values(decks).forEach(deck => { deck.audio.pause(); if (deck.track?.url) URL.revokeObjectURL(deck.track.url); deck.track = null; updateDeck(deck.name); }); await dbClear(); state.tracks = []; state.queue = []; updateNowPlaying(); saveQueue(); toast('Local library cleared'); };
+  $('trackList').onchange = event => { const checkbox = event.target.closest('[data-select-track]'); if (!checkbox) return; checkbox.checked ? state.selectedTracks.add(checkbox.dataset.selectTrack) : state.selectedTracks.delete(checkbox.dataset.selectTrack); renderLibrary(); };
+  $('clearLibraryBtn').onclick = async () => { if (!state.tracks.length || !confirm('Clear every locally saved track and the show rundown?')) return; Object.values(decks).forEach(deck => { deck.audio.pause(); if (deck.track?.url) URL.revokeObjectURL(deck.track.url); deck.track = null; updateDeck(deck.name); }); await dbClear(); state.tracks = []; state.queue = []; state.selectedTracks.clear(); updateNowPlaying(); saveQueue(); toast('Local library cleared'); };
   $('queueList').onclick = event => { const item = event.target.closest('.queue-item'); if (item && event.target.closest('[data-remove-queue]')) { state.queue.splice(+item.dataset.index, 1); saveQueue(); } };
   let dragged = null; $('queueList').ondragstart = event => { dragged = +event.target.closest('.queue-item')?.dataset.index; }; $('queueList').ondragover = event => event.preventDefault(); $('queueList').ondrop = event => { event.preventDefault(); const target = +event.target.closest('.queue-item')?.dataset.index; if (Number.isInteger(dragged) && Number.isInteger(target) && dragged !== target) { const [id] = state.queue.splice(dragged, 1); state.queue.splice(target, 0, id); saveQueue(); } dragged = null; };
   $('shuffleQueueBtn').onclick = () => { for (let index = state.queue.length - 1; index > 0; index--) { const swap = Math.floor(Math.random() * (index + 1)); [state.queue[index], state.queue[swap]] = [state.queue[swap], state.queue[index]]; } saveQueue(); toast(state.queue.length > 1 ? 'Rundown shuffled' : 'Add at least two tracks to shuffle'); };

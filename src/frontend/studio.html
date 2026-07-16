@@ -32,8 +32,9 @@
       <section class="view active" id="libraryView" data-view="library">
         <div class="view-head">
           <div><span class="kicker">01 / YOUR SOUND</span><h1>Music library</h1><p>Import once. Build shows whenever inspiration hits.</p></div>
-          <button class="primary" id="importBtn" type="button" aria-describedby="importProgress"><span>＋</span> Import audio</button>
-          <input id="audioInput" type="file" accept="audio/*" multiple hidden>
+          <div class="import-actions"><div><button id="importFolderBtn" type="button"><span>＋</span> Import folder</button><button class="primary" id="importBtn" type="button" aria-describedby="mobileImportHint importProgress"><span>＋</span> Import audio</button></div><small id="mobileImportHint">PHONE · CHOOSE BROWSE / FILES</small></div>
+          <input id="audioInput" type="file" multiple hidden>
+          <input id="folderInput" type="file" webkitdirectory directory multiple hidden>
         </div>
         <section class="import-progress panel" id="importProgress" aria-live="polite" aria-busy="false" hidden>
           <div class="import-progress-head"><div><span>LOCAL IMPORT</span><b id="importProgressLabel">Preparing audio…</b></div><strong id="importProgressValue">0%</strong></div>
@@ -47,8 +48,8 @@
           <article class="storage-card"><span>ON THIS DEVICE</span><b id="sizeStat">0 MB</b><i><em id="storageBar"></em></i></article>
         </div>
         <div class="collection panel">
-          <div class="collection-tools"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search title or artist"></label><div><button id="sortBtn" type="button">Title A–Z</button><button id="clearLibraryBtn" class="quiet danger" type="button">Clear library</button></div></div>
-          <div class="track-header"><span>#</span><span>TITLE</span><span>ARTIST</span><span>TIME</span><span></span></div>
+          <div class="collection-tools"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search title or artist"></label><div class="library-actions"><div class="bulk-actions"><button id="selectAllBtn" type="button">Select all</button><button id="addSelectedBtn" type="button" disabled>Add selected to rundown</button></div><button id="sortBtn" type="button">Title A–Z</button><button id="clearLibraryBtn" class="quiet danger" type="button">Clear library</button></div></div>
+          <div class="track-header"><span>SELECT</span><span>TITLE</span><span>ARTIST</span><span>TIME</span><span></span></div>
           <div id="trackList" class="track-list"><div class="empty-state"><i>♫</i><h2>Your library is quiet</h2><p>Import MP3, WAV, M4A or other browser-supported audio.</p><button type="button" data-import>Choose audio files</button></div></div>
         </div>
       </section>
