@@ -2,9 +2,9 @@
 
 **Build your show. Then go live.**
 
-CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.0 Alpha 3**. It combines a persistent music library, show rundown, two-deck live desk, microphone input, shuffle playback, and automatic playback in an installable web application.
+CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.0 Alpha 4**. It combines a persistent music library, assisted show building, a two-deck live desk, microphone input, local recording, shuffle and repeat-safe automatic playback in an installable web application.
 
-[Open the public website](https://crazytalkradio-studio.vercel.app/) · [Launch the studio](https://crazytalkradio-studio.vercel.app/studio.html)
+[Open the public website](https://ctr-studio-open.vercel.app/) · [Launch the studio](https://ctr-studio-open.vercel.app/studio.html)
 
 ## Why local-first?
 
@@ -15,15 +15,20 @@ Browser storage is not a replacement for the original music files or a separate 
 ## Open features
 
 - Persistent on-device music library using IndexedDB
-- Searchable and sortable track collection
-- Saved show rundown with drag ordering and runtime estimate
+- Searchable, sortable and editable track collection with Music, ID, Promo and Sweeper tags
+- Duplicate-aware folder/file import with progress, cancellation and storage checks
+- Assisted Show Builder with configurable ID and promo spacing
+- Saved show rundown with drag, touch controls, templates and runtime estimate
+- Workstation settings/rundown backup and restore (audio remains local)
 - Independent Deck A and Deck B playback
 - Equal-power crossfader and master volume
-- One-button automatic transitions
-- Continuous Auto DJ playback
-- Persistent shuffle playback and one-click rundown randomisation
+- Guarded manual transitions that start the incoming deck
+- Continuous overlapping Auto DJ playback
+- Persistent shuffle, recent-track repeat protection and rundown randomisation
+- Muted-by-default Program output gate, output meter and waveform previews
 - Live microphone input
-- Session clock and now-playing information
+- Local master-output recording and supported output-device selection
+- Session clock, keyboard shortcuts and now-playing information
 - Installable progressive web application
 - Offline application shell
 - Responsive desktop and mobile layouts
@@ -71,6 +76,7 @@ The smoke test starts the local server, checks the V2 health response, verifies 
 │       ├── studio.html             V2 studio application
 │       ├── ctr-v2-site.css         Public website styles
 │       ├── ctr-studio-v2.css       Studio styles
+│       ├── studio-core.js          Tested show-building and playback selection logic
 │       ├── ctr-studio-v2.js        Library, rundown, audio, and PWA logic
 │       ├── service-worker.js       Offline application shell
 │       └── manifest.webmanifest    Install metadata

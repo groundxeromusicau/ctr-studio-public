@@ -1,12 +1,12 @@
 {
   "name": "ctr-studio",
-  "version": "2.0.0-alpha.3",
+  "version": "2.0.0-alpha.4",
   "description": "CTR Studio Open - a local-first show builder and live radio workspace.",
   "main": "main.js",
   "scripts": {
     "start": "node scripts/start-electron.js",
     "dev": "node src/backend/server.js",
-    "test": "node scripts/ci-smoke.js"
+    "test": "node scripts/core-test.js && node scripts/ci-smoke.js"
   },
   "keywords": [
     "radio",

@@ -39,8 +39,12 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check src/backend/server.js
+          node --check main.js
+          node --check src/frontend/studio-core.js
           node --check src/frontend/ctr-studio-v2.js
           node --check src/frontend/service-worker.js
+          node --check src/frontend/site.js
+          node --check scripts/core-test.js
           node --check scripts/ci-smoke.js
 
       - name: Verify package versions

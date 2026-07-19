@@ -7,6 +7,7 @@
   <meta name="description" content="CTR Studio Open — build your show, then go live.">
   <title>CTR Studio Open</title>
   <link rel="icon" href="ctr-icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="ctr-icon-192.png">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="ctr-studio-v2.css">
   <link rel="stylesheet" href="ctr-shuffle.css">
@@ -25,7 +26,7 @@
         <button class="rail-item" type="button" data-view-target="rundown"><i>≡</i><span>Rundown</span><b id="queueBadge">0</b></button>
         <button class="rail-item" type="button" data-view-target="live"><i>◉</i><span>Live desk</span></button>
       </nav>
-      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 · ALPHA 3</small></div>
+      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 · ALPHA 4</small></div>
     </aside>
 
     <main class="stage">
@@ -39,7 +40,7 @@
         <section class="import-progress panel" id="importProgress" aria-live="polite" aria-busy="false" hidden>
           <div class="import-progress-head"><div><span>LOCAL IMPORT</span><b id="importProgressLabel">Preparing audio…</b></div><strong id="importProgressValue">0%</strong></div>
           <div class="import-progress-track" id="importProgressBar" role="progressbar" aria-label="Track import progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="importProgressFill"></i></div>
-          <small id="importProgressFile">Waiting for selected files</small>
+          <div class="import-progress-foot"><small id="importProgressFile">Waiting for selected files</small><button id="cancelImportBtn" type="button">Cancel import</button></div>
         </section>
         <div class="stat-row">
           <article><span>TRACKS</span><b id="trackStat">0</b></article>
@@ -48,8 +49,8 @@
           <article class="storage-card"><span>ON THIS DEVICE</span><b id="sizeStat">0 MB</b><i><em id="storageBar"></em></i></article>
         </div>
         <div class="collection panel">
-          <div class="collection-tools"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search title or artist"></label><div class="library-actions"><div class="bulk-actions"><button id="selectAllBtn" type="button">Select all</button><button id="addSelectedBtn" type="button" disabled>Add selected to rundown</button></div><button id="sortBtn" type="button">Title A–Z</button><button id="clearLibraryBtn" class="quiet danger" type="button">Clear library</button></div></div>
-          <div class="track-header"><span>SELECT</span><span>TITLE</span><span>ARTIST</span><span>TIME</span><span></span></div>
+          <div class="collection-tools"><label class="search"><span>⌕</span><input id="searchInput" type="search" placeholder="Search title, artist or type"></label><div class="library-actions"><div class="bulk-actions"><button id="selectAllBtn" type="button">Select all</button><button id="addSelectedBtn" type="button" disabled>Add selected to rundown</button></div><select id="typeFilter" aria-label="Filter media type"><option value="all">All types</option><option value="music">Music</option><option value="id">IDs</option><option value="promo">Promos</option><option value="sweeper">Sweepers</option></select><button id="sortBtn" type="button">Title A–Z</button><button id="backupBtn" type="button">Backup</button><button id="restoreBtn" type="button">Restore</button><input id="restoreInput" type="file" accept="application/json,.json" hidden><button id="clearLibraryBtn" class="quiet danger" type="button">Clear library</button></div></div>
+          <div class="track-header"><span>SELECT</span><span>TITLE</span><span>ARTIST / TYPE</span><span>TIME</span><span></span></div>
           <div id="trackList" class="track-list"><div class="empty-state"><i>♫</i><h2>Your library is quiet</h2><p>Import MP3, WAV, M4A or other browser-supported audio.</p><button type="button" data-import>Choose audio files</button></div></div>
         </div>
       </section>
@@ -61,39 +62,40 @@
         </div>
         <div class="rundown-layout">
           <section class="queue panel">
-            <div class="panel-head"><div><span>NEXT UP</span><h2 id="showName" contenteditable="true" spellcheck="false">Untitled show</h2></div><div><b id="queueDuration">0:00</b><small>TOTAL RUNTIME</small></div></div>
+            <div class="panel-head"><div><span>NEXT UP</span><h2 id="showName" contenteditable="true" role="textbox" aria-label="Show name" spellcheck="false">Untitled show</h2></div><div><b id="queueDuration">0:00</b><small>TOTAL RUNTIME</small></div></div>
             <ol id="queueList" class="queue-list"><li class="empty-state"><i>≡</i><h2>No tracks in your rundown</h2><p>Add music from the library, then drag it into show order.</p><button type="button" data-go-library>Browse library</button></li></ol>
-            <div class="queue-foot"><div><button id="shuffleQueueBtn" class="quiet" type="button">⌘ Shuffle rundown</button><button id="clearQueueBtn" class="quiet danger" type="button">Clear rundown</button></div><span>Changes save automatically</span></div>
+            <div class="queue-foot"><div><button id="shuffleQueueBtn" class="quiet" type="button">⌘ Shuffle rundown</button><button id="saveTemplateBtn" class="quiet" type="button">Save template</button><button id="loadTemplateBtn" class="quiet" type="button">Load template</button><button id="clearQueueBtn" class="quiet danger" type="button">Clear rundown</button></div><span>Changes save automatically</span></div>
           </section>
           <aside class="show-aside">
             <section class="panel show-card"><span>SHOW CLOCK</span><b id="showClock">00:00:00</b><i></i><small>ESTIMATED END</small><strong id="estimatedEnd">—</strong></section>
-            <section class="panel readiness"><span>READY CHECK</span><ul><li><i class="good"></i>Local session active</li><li><i id="libraryCheck"></i><span id="libraryCheckText">Add music to library</span></li><li><i id="queueCheck"></i><span id="queueCheckText">Build a show rundown</span></li></ul></section>
+            <section class="panel show-builder"><span>ASSISTED SHOW BUILDER</span><p>Space station imaging through the music automatically.</p><label>Station ID every <select id="idSpacing"><option value="0">Off</option><option value="2">2 songs</option><option value="3" selected>3 songs</option><option value="4">4 songs</option><option value="5">5 songs</option></select></label><label>Promo every <select id="promoSpacing"><option value="0">Off</option><option value="4">4 songs</option><option value="6" selected>6 songs</option><option value="8">8 songs</option><option value="10">10 songs</option></select></label><button id="buildShowBtn" class="primary lime" type="button">Build balanced rundown</button><small>Tag tracks as ID, Promo or Sweeper in the library first.</small></section>
+            <section class="panel readiness"><span>READY CHECK</span><ul><li><i class="good"></i>Local session active</li><li><i id="libraryCheck"></i><span id="libraryCheckText">Add music to library</span></li><li><i id="queueCheck"></i><span id="queueCheckText">Build a show rundown</span></li><li><i id="storageCheck"></i><span id="storageCheckText">Checking local storage</span></li></ul></section>
           </aside>
         </div>
       </section>
 
       <section class="view live-view" id="liveView" data-view="live">
-        <div class="live-head"><div><span class="kicker">03 / LIVE DESK</span><h1 id="liveShowName">Untitled show</h1></div><div class="on-air-state"><i></i><span>STANDBY</span><time id="sessionTimer">00:00:00</time></div><button id="shuffleBtn" type="button">SHUFFLE <b>OFF</b></button><button id="autoBtn" type="button">AUTO DJ <b>OFF</b></button></div>
-        <div class="now-strip"><span>NOW PLAYING</span><b id="nowTitle">Nothing playing</b><em id="nowMeta">Load a track to either deck</em><div class="meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+        <div class="live-head"><div><span class="kicker">03 / LIVE DESK</span><h1 id="liveShowName">Untitled show</h1></div><button id="programBtn" class="on-air-state" type="button"><i></i><span>STANDBY</span><time id="sessionTimer">00:00:00</time></button><button id="recordBtn" type="button">RECORD <b>OFF</b></button><button id="shuffleBtn" type="button">SHUFFLE <b>OFF</b></button><button id="autoBtn" type="button">AUTO DJ <b>OFF</b></button></div>
+        <div class="now-strip"><span>NOW PLAYING</span><b id="nowTitle">Nothing playing</b><em id="nowMeta">Load a track to either deck</em><canvas id="masterMeter" class="meter" width="180" height="28" aria-label="Master output level"></canvas></div>
         <div class="desk-grid">
           <article class="deck panel" data-deck="A">
             <div class="deck-label"><span>DECK A</span><b id="statusA">EMPTY</b></div>
             <div class="platter red"><div><span>A</span><i></i></div></div>
             <h2 id="titleA">No track loaded</h2><p id="artistA">Choose one from the queue or library</p>
-            <div class="timeline"><input id="progressA" type="range" min="0" max="1000" value="0" aria-label="Deck A position"><div><span id="currentA">0:00</span><span id="durationA">0:00</span></div></div>
+            <canvas id="waveformA" class="waveform" width="520" height="54" aria-hidden="true"></canvas><div class="timeline"><input id="progressA" type="range" min="0" max="1000" value="0" aria-label="Deck A position"><div><span id="currentA">0:00</span><span id="durationA">0:00</span></div></div>
             <div class="deck-controls"><button data-action="previous" aria-label="Previous track">|‹</button><button class="play" data-action="play">▶ <span>PLAY</span></button><button data-action="next" aria-label="Next track">›|</button></div>
           </article>
           <section class="mix-column panel">
             <span>A</span><input id="crossfader" type="range" min="0" max="100" value="0" aria-label="Crossfader"><span>B</span>
             <button id="mixBtn" class="mix-btn" type="button">MIX TO B</button>
-            <label>MASTER<input id="master" type="range" min="0" max="100" value="85"><b id="masterValue">85%</b></label>
+            <label>MASTER<input id="master" type="range" min="0" max="100" value="85"><b id="masterValue">85%</b></label><label class="output-label">OUTPUT<select id="outputDevice"><option value="default">System default</option></select></label>
             <button id="micBtn" class="mic-btn" type="button"><i></i> MIC OFF</button>
           </section>
           <article class="deck panel" data-deck="B">
             <div class="deck-label"><span>DECK B</span><b id="statusB">EMPTY</b></div>
             <div class="platter blue"><div><span>B</span><i></i></div></div>
             <h2 id="titleB">No track loaded</h2><p id="artistB">Choose one from the queue or library</p>
-            <div class="timeline"><input id="progressB" type="range" min="0" max="1000" value="0" aria-label="Deck B position"><div><span id="currentB">0:00</span><span id="durationB">0:00</span></div></div>
+            <canvas id="waveformB" class="waveform" width="520" height="54" aria-hidden="true"></canvas><div class="timeline"><input id="progressB" type="range" min="0" max="1000" value="0" aria-label="Deck B position"><div><span id="currentB">0:00</span><span id="durationB">0:00</span></div></div>
             <div class="deck-controls"><button data-action="previous" aria-label="Previous track">|‹</button><button class="play" data-action="play">▶ <span>PLAY</span></button><button data-action="next" aria-label="Next track">›|</button></div>
           </article>
           <aside class="live-queue panel"><div class="panel-head"><div><span>RUNDOWN</span><h2>Up next</h2></div><b id="liveQueueCount">0</b></div><div id="liveQueue" class="live-queue-list"><div class="empty-state"><p>Your rundown is empty.</p></div></div><button type="button" data-go-rundown>Edit rundown</button></aside>
@@ -103,7 +105,10 @@
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <dialog id="helpDialog"><form method="dialog"><div><span>CTR STUDIO OPEN · VERSION 2.0</span><button value="close" aria-label="Close">×</button></div><h2>Build your show, then go live.</h2><ol><li>Import local audio into your persistent library.</li><li>Add tracks to the rundown and arrange the order.</li><li>Open the Live Desk and load either deck.</li><li>Mix manually or turn on Auto DJ.</li></ol><p>Your library is stored only in this browser on this device.</p><button class="primary" value="close">Got it</button></form></dialog>
+  <dialog id="trackDialog"><form id="trackForm"><div><span>EDIT LOCAL TRACK</span><button type="button" data-close-dialog aria-label="Close">×</button></div><h2>Track details</h2><input id="editTrackId" type="hidden"><label>Title<input id="editTitle" maxlength="120" required></label><label>Artist<input id="editArtist" maxlength="120" required></label><label>Media type<select id="editType"><option value="music">Music</option><option value="id">Station ID</option><option value="promo">Promo</option><option value="sweeper">Sweeper</option></select></label><div class="dialog-actions"><button id="deleteTrackBtn" class="danger" type="button">Delete track</button><button class="primary lime" type="submit">Save changes</button></div></form></dialog>
+  <dialog id="updateDialog"><form method="dialog"><div><span>OPEN UPDATE READY</span><button value="close" aria-label="Close">×</button></div><h2>A fresh studio build is ready.</h2><p>Reload when it is safe to leave the current session.</p><button id="reloadUpdateBtn" class="primary lime" value="close">Reload studio</button></form></dialog>
+  <dialog id="helpDialog"><form method="dialog"><div><span>CTR STUDIO OPEN · VERSION 2.0 ALPHA 4</span><button value="close" aria-label="Close">×</button></div><h2>Build your show, then go live.</h2><ol><li>Import and tag local audio in your library.</li><li>Build a rundown manually or use Assisted Show Builder.</li><li>Load either deck, then enable Program before going on air.</li><li>Mix manually, record locally or turn on Auto DJ.</li></ol><p>Your audio and workstation data stay only on this device. Shortcuts: Space plays the active deck, M mixes, P toggles Program.</p><p>On iPhone or iPad, open Share and choose “Add to Home Screen” to install Open.</p><button class="primary" value="close">Got it</button></form></dialog>
+  <script src="studio-core.js"></script>
   <script src="ctr-studio-v2.js"></script>
 </body>
 </html>
