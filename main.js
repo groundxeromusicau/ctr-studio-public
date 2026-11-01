@@ -1,9 +1,12 @@
 require('./scripts/load-env')();
 
-const { app, BrowserWindow, Menu, dialog, net, protocol, session, shell } = require('electron');
+const { app, BrowserWindow, Menu, dialog, ipcMain, net, protocol, safeStorage, session, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
+const { streamSettings } = require('./src/frontend/studio-core');
+const { createIcecast } = require('./desktop/icecast');
+const { startOverlay } = require('./desktop/overlay');
 
 // The studio is served from ctr://studio/ rather than a local web server. A fixed,
 // secure origin keeps the library (IndexedDB) and settings between launches; a
@@ -50,6 +53,48 @@ function createWindow() {
   win.loadURL(`${ORIGIN}/studio.html`).catch(error => dialog.showErrorBox('CTR Studio Open could not load', error.message));
 }
 
+// Going live: the studio encodes the Program output and hands the bytes over; this
+// process holds the Icecast connection. Settings live in userData, the password
+// encrypted with the system keychain where there is one.
+const streamFile = () => path.join(app.getPath('userData'), 'stream.json');
+function readStream() { try { return JSON.parse(fs.readFileSync(streamFile(), 'utf8')); } catch { return {}; } }
+function streamPassword(saved) {
+  if (!saved.password) return '';
+  try { return saved.encrypted ? safeStorage.decryptString(Buffer.from(saved.password, 'base64')) : Buffer.from(saved.password, 'base64').toString('utf8'); } catch { return ''; }
+}
+let icecast, overlay;
+function desktopBridge() {
+  const fromStudio = event => String(event.senderFrame?.url || '').startsWith(ORIGIN);
+  icecast = createIcecast(status => { if (win && !win.isDestroyed()) win.webContents.send('stream:status', status); });
+  overlay = startOverlay(path.join(FRONTEND, 'overlay'));
+  ipcMain.handle('stream:load', event => { if (!fromStudio(event)) return null; const saved = readStream(); return { settings: streamSettings(saved.settings).settings, hasPassword: Boolean(saved.password), configured: Boolean(saved.settings?.host), status: icecast.status() }; });
+  ipcMain.handle('stream:save', (event, value, password) => {
+    if (!fromStudio(event)) return null;
+    const { settings, error } = streamSettings(value);
+    if (error) return { error };
+    const saved = readStream(), next = { settings, password: saved.password, encrypted: saved.encrypted };
+    if (typeof password === 'string' && password) {
+      const encrypted = safeStorage.isEncryptionAvailable();
+      next.password = (encrypted ? safeStorage.encryptString(password) : Buffer.from(password, 'utf8')).toString('base64');
+      next.encrypted = encrypted;
+    }
+    fs.writeFileSync(streamFile(), JSON.stringify(next), { mode: 0o600 });
+    return { settings, hasPassword: Boolean(next.password) };
+  });
+  ipcMain.handle('stream:connect', event => {
+    if (!fromStudio(event)) return null;
+    const saved = readStream(), { settings, error } = streamSettings(saved.settings);
+    if (!saved.settings?.host || error) return { error: error || 'Set up your stream first' };
+    icecast.connect(settings, streamPassword(saved));
+    return { settings };
+  });
+  ipcMain.handle('stream:disconnect', event => { if (fromStudio(event)) icecast.disconnect(); });
+  ipcMain.on('stream:write', (event, bytes) => { if (fromStudio(event) && bytes instanceof Uint8Array) icecast.write(Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength)); });
+  ipcMain.on('stream:metadata', (event, text) => { if (fromStudio(event)) icecast.metadata(text); });
+  ipcMain.handle('overlay:url', event => (fromStudio(event) ? overlay.url() : null));
+  ipcMain.on('overlay:update', (event, value) => { if (fromStudio(event) && value && typeof value === 'object') overlay.update(value); });
+}
+
 function menu() {
   const mac = process.platform === 'darwin';
   Menu.setApplicationMenu(Menu.buildFromTemplate([
@@ -77,12 +122,15 @@ else {
   app.whenReady().then(() => {
     protocol.handle(SCHEME, serve);
     const studio = origin => String(origin).startsWith(ORIGIN);
-    session.defaultSession.setPermissionCheckHandler((_webContents, permission, requestingOrigin) => ['media', 'speaker-selection', 'midi', 'persistent-storage'].includes(permission) && studio(requestingOrigin));
-    session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback, details) => callback(['media', 'speaker-selection', 'midi', 'midiSysex', 'persistent-storage'].includes(permission) && studio(details.requestingUrl)));
+    const allowed = ['media', 'speaker-selection', 'midi', 'midiSysex', 'persistent-storage', 'notifications', 'fullscreen', 'clipboard-sanitized-write'];
+    session.defaultSession.setPermissionCheckHandler((_webContents, permission, requestingOrigin) => allowed.includes(permission) && studio(requestingOrigin));
+    session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback, details) => callback(allowed.includes(permission) && studio(details.requestingUrl)));
+    desktopBridge();
     menu();
     createWindow();
     checkForUpdates();
   });
   app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
   app.on('window-all-closed', () => app.quit());
+  app.on('before-quit', () => { icecast?.disconnect(); overlay?.close(); });
 }

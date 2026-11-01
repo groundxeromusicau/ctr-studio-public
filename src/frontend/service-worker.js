@@ -1,6 +1,6 @@
 const CACHE_PREFIX = 'ctr-studio-open-';
-const CACHE = `${CACHE_PREFIX}v2-shell-v8`;
-const SHELL = ['/', '/studio.html', '/ctr-v2-site.css', '/ctr-studio-v2.css', '/ctr-shuffle.css', '/studio-core.js', '/ctr-studio-v2.js', '/site.js', '/ctr-icon.svg', '/ctr-icon-192.png', '/ctr-icon-512.png', '/manifest.webmanifest'];
+const CACHE = `${CACHE_PREFIX}v2-shell-v9`;
+const SHELL = ['/', '/studio.html', '/ctr-v2-site.css', '/ctr-studio-v2.css', '/ctr-shuffle.css', '/ctr-open-tools.css', '/studio-core.js', '/ctr-studio-v2.js', '/site.js', '/ctr-icon.svg', '/ctr-icon-192.png', '/ctr-icon-512.png', '/manifest.webmanifest'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)));

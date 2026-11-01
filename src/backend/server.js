@@ -17,7 +17,7 @@ app.use((_req, res, next) => {
   });
   next();
 });
-app.get('/api/health', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ ok: true, product: 'CTR Studio Open', version: '2.0.0-alpha.4' }); });
+app.get('/api/health', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json({ ok: true, product: 'CTR Studio Open', version: '2.1.0' }); });
 app.use(express.static(frontend, {
   index: 'index.html',
   etag: true,

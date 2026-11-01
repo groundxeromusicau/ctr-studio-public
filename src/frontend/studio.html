@@ -11,6 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="ctr-studio-v2.css">
   <link rel="stylesheet" href="ctr-shuffle.css">
+  <link rel="stylesheet" href="ctr-open-tools.css">
 </head>
 <body>
   <div class="app-shell">
@@ -26,7 +27,7 @@
         <button class="rail-item" type="button" data-view-target="rundown"><i>≡</i><span>Rundown</span><b id="queueBadge">0</b></button>
         <button class="rail-item" type="button" data-view-target="live"><i>◉</i><span>Live desk</span></button>
       </nav>
-      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.0 · ALPHA 4</small></div>
+      <div class="rail-foot"><span id="storageState">LOCAL DATA</span><small>V2.1</small></div>
     </aside>
 
     <main class="stage">
@@ -75,14 +76,16 @@
       </section>
 
       <section class="view live-view" id="liveView" data-view="live">
-        <div class="live-head"><div><span class="kicker">03 / LIVE DESK</span><h1 id="liveShowName">Untitled show</h1></div><button id="programBtn" class="on-air-state" type="button"><i></i><span>STANDBY</span><time id="sessionTimer">00:00:00</time></button><button id="recordBtn" type="button">RECORD <b>OFF</b></button><button id="shuffleBtn" type="button">SHUFFLE <b>OFF</b></button><button id="autoBtn" type="button">AUTO DJ <b>OFF</b></button></div>
+        <div class="live-head"><div><span class="kicker">03 / LIVE DESK</span><h1 id="liveShowName">Untitled show</h1></div><button id="programBtn" class="on-air-state" type="button"><i></i><span>STANDBY</span><time id="sessionTimer">00:00:00</time></button><button id="recordBtn" type="button">RECORD <b>OFF</b></button><button id="shuffleBtn" type="button">SHUFFLE <b>OFF</b></button><button id="autoBtn" type="button">AUTO DJ <b>OFF</b></button><button id="streamBtn" type="button">STREAM <b>OFF</b></button><button id="visualsBtn" type="button">VISUALS</button><button id="midiBtn" type="button">MIDI <b>OFF</b></button></div>
         <div class="now-strip"><span>NOW PLAYING</span><b id="nowTitle">Nothing playing</b><em id="nowMeta">Load a track to either deck</em><canvas id="masterMeter" class="meter" width="180" height="28" aria-label="Master output level"></canvas></div>
+        <div class="silence-alert" id="silenceAlert" role="alert" hidden><b>SILENCE ON AIR</b><span id="silenceText">Program is open and nothing is playing.</span></div>
         <div class="desk-grid">
           <article class="deck panel" data-deck="A">
             <div class="deck-label"><span>DECK A</span><b id="statusA">EMPTY</b></div>
             <div class="platter red"><div><span>A</span><i></i></div></div>
             <h2 id="titleA">No track loaded</h2><p id="artistA">Choose one from the queue or library</p>
-            <canvas id="waveformA" class="waveform" width="520" height="54" aria-hidden="true"></canvas><div class="timeline"><input id="progressA" type="range" min="0" max="1000" value="0" aria-label="Deck A position"><div><span id="currentA">0:00</span><span id="durationA">0:00</span></div></div>
+            <canvas id="waveformA" class="waveform" width="520" height="54" title="Click to jump to that point" aria-hidden="true"></canvas><div class="timeline"><input id="progressA" type="range" min="0" max="1000" value="0" aria-label="Deck A position"><div><span id="currentA">0:00</span><span id="durationA">0:00</span></div></div>
+            <div class="deck-tools"><label>LOW<input type="range" min="-20" max="20" step="0.5" value="0" data-eq="low" aria-label="Deck A low"></label><label>MID<input type="range" min="-20" max="20" step="0.5" value="0" data-eq="mid" aria-label="Deck A mid"></label><label>HIGH<input type="range" min="-20" max="20" step="0.5" value="0" data-eq="high" aria-label="Deck A high"></label><button type="button" data-action="loop" aria-pressed="false">LOOP</button></div>
             <div class="deck-controls"><button data-action="previous" aria-label="Previous track">|‹</button><button class="play" data-action="play">▶ <span>PLAY</span></button><button data-action="next" aria-label="Next track">›|</button></div>
           </article>
           <section class="mix-column panel">
@@ -95,7 +98,8 @@
             <div class="deck-label"><span>DECK B</span><b id="statusB">EMPTY</b></div>
             <div class="platter blue"><div><span>B</span><i></i></div></div>
             <h2 id="titleB">No track loaded</h2><p id="artistB">Choose one from the queue or library</p>
-            <canvas id="waveformB" class="waveform" width="520" height="54" aria-hidden="true"></canvas><div class="timeline"><input id="progressB" type="range" min="0" max="1000" value="0" aria-label="Deck B position"><div><span id="currentB">0:00</span><span id="durationB">0:00</span></div></div>
+            <canvas id="waveformB" class="waveform" width="520" height="54" title="Click to jump to that point" aria-hidden="true"></canvas><div class="timeline"><input id="progressB" type="range" min="0" max="1000" value="0" aria-label="Deck B position"><div><span id="currentB">0:00</span><span id="durationB">0:00</span></div></div>
+            <div class="deck-tools"><label>LOW<input type="range" min="-20" max="20" step="0.5" value="0" data-eq="low" aria-label="Deck B low"></label><label>MID<input type="range" min="-20" max="20" step="0.5" value="0" data-eq="mid" aria-label="Deck B mid"></label><label>HIGH<input type="range" min="-20" max="20" step="0.5" value="0" data-eq="high" aria-label="Deck B high"></label><button type="button" data-action="loop" aria-pressed="false">LOOP</button></div>
             <div class="deck-controls"><button data-action="previous" aria-label="Previous track">|‹</button><button class="play" data-action="play">▶ <span>PLAY</span></button><button data-action="next" aria-label="Next track">›|</button></div>
           </article>
           <aside class="live-queue panel"><div class="panel-head"><div><span>RUNDOWN</span><h2>Up next</h2></div><b id="liveQueueCount">0</b></div><div id="liveQueue" class="live-queue-list"><div class="empty-state"><p>Your rundown is empty.</p></div></div><button type="button" data-go-rundown>Edit rundown</button></aside>
@@ -107,7 +111,20 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <dialog id="trackDialog"><form id="trackForm"><div><span>EDIT LOCAL TRACK</span><button type="button" data-close-dialog aria-label="Close">×</button></div><h2>Track details</h2><input id="editTrackId" type="hidden"><label>Title<input id="editTitle" maxlength="120" required></label><label>Artist<input id="editArtist" maxlength="120" required></label><label>Media type<select id="editType"><option value="music">Music</option><option value="id">Station ID</option><option value="promo">Promo</option><option value="sweeper">Sweeper</option></select></label><div class="dialog-actions"><button id="deleteTrackBtn" class="danger" type="button">Delete track</button><button class="primary lime" type="submit">Save changes</button></div></form></dialog>
   <dialog id="updateDialog"><form method="dialog"><div><span>OPEN UPDATE READY</span><button value="close" aria-label="Close">×</button></div><h2>A fresh studio build is ready.</h2><p>Reload when it is safe to leave the current session.</p><button id="reloadUpdateBtn" class="primary lime" value="close">Reload studio</button></form></dialog>
-  <dialog id="helpDialog"><form method="dialog"><div><span>CTR STUDIO OPEN · VERSION 2.0 ALPHA 4</span><button value="close" aria-label="Close">×</button></div><h2>Build your show, then go live.</h2><ol><li>Import and tag local audio in your library.</li><li>Build a rundown manually or use Assisted Show Builder.</li><li>Load either deck, then enable Program before going on air.</li><li>Mix manually, record locally or turn on Auto DJ.</li></ol><p>Your audio and workstation data stay only on this device. Shortcuts: Space plays the active deck, M mixes, P toggles Program.</p><p>On iPhone or iPad, open Share and choose “Add to Home Screen” to install Open.</p><button class="primary" value="close">Got it</button></form></dialog>
+  <dialog id="helpDialog"><form method="dialog"><div><span>CTR STUDIO OPEN · VERSION 2.1</span><button value="close" aria-label="Close">×</button></div><h2>Build your show, then go live.</h2><ol><li>Import and tag local audio in your library.</li><li>Build a rundown manually or use Assisted Show Builder.</li><li>Load either deck, then enable Program before going on air.</li><li>Mix manually, record locally or turn on Auto DJ.</li></ol><p>Your audio and workstation data stay only on this device. Shortcuts: Space plays the active deck, M mixes, P toggles Program, L loops the active deck, V opens the visuals.</p><p>On iPhone or iPad, open Share and choose “Add to Home Screen” to install Open.</p><button class="primary" value="close">Got it</button></form></dialog>
+  <dialog id="midiDialog"><form method="dialog"><div><span>MIDI CONTROLLER</span><button value="close" aria-label="Close">×</button></div><h2>Map your controller.</h2><p id="midiStatus" class="dialog-note">Looking for MIDI devices…</p><div class="midi-last"><span>LAST MESSAGE</span><b id="midiLast">—</b></div><div id="midiList" class="midi-list"></div><p class="dialog-note">Press Learn, then press a pad or move a knob. Knobs and faders control the sliders; buttons toggle. Lit buttons on your controller follow the studio.</p><div class="dialog-actions"><button type="button" id="midiClearBtn" class="quiet danger">Clear all</button><button class="primary" value="close">Done</button></div></form></dialog>
+  <dialog id="streamDialog"><form id="streamForm"><div><span>GO LIVE · ICECAST / SHOUTCAST</span><button type="button" data-close-dialog aria-label="Close">×</button></div>
+    <div id="streamWeb" hidden><h2>Going live is in the desktop app.</h2><p class="dialog-note">CTR Studio Open for Mac, Windows and Linux streams your Program output to an Icecast or SHOUTcast server, and puts what's playing on screen in OBS. It's free too.</p><a class="primary link-button" href="https://github.com/groundxeromusicau/ctr-studio-public/releases/latest" target="_blank" rel="noopener">Get the desktop app</a></div>
+    <div id="streamDesktop"><h2>Your stream</h2>
+      <div class="form-grid"><label class="wide">Server<input id="streamHost" placeholder="radio.example.com" autocomplete="off" spellcheck="false"></label><label>Port<input id="streamPort" type="number" min="1" max="65535" value="8000"></label><label>Mount point<input id="streamMount" value="/stream" spellcheck="false"></label><label>Username<input id="streamUser" value="source" autocomplete="off" spellcheck="false"></label><label>Password<input id="streamPassword" type="password" autocomplete="new-password"></label><label>Format<select id="streamFormat"><option value="mp3">MP3 (plays everywhere)</option><option value="opus">Opus / WebM (better at low bitrates)</option></select></label><label>Bitrate<select id="streamKbps"><option>64</option><option>96</option><option selected>128</option><option>160</option><option>192</option><option>256</option><option>320</option></select></label><label class="wide">Station name<input id="streamName" maxlength="80"></label><label class="wide">Genre<input id="streamGenre" maxlength="40"></label></div>
+      <p id="streamState" class="dialog-note">Listeners hear the Program output: open Program (P) to be heard.</p>
+      <div class="dialog-actions"><button type="submit" id="streamSaveBtn">Save</button><button type="button" id="streamGoBtn" class="primary lime">Save and go live</button></div>
+      <h2 class="overlay-head">OBS overlay</h2>
+      <p class="dialog-note">Add a <b>Browser</b> source in OBS with this address, 1920 × 1080. It shows what's playing and an ON AIR bug, on a transparent background.</p>
+      <div class="overlay-url"><code id="overlayUrl">Starting…</code><button type="button" id="overlayCopyBtn">Copy</button></div>
+      <label class="check"><input type="checkbox" id="overlayLowerThird" checked> Now playing lower third</label><label class="check"><input type="checkbox" id="overlayBug" checked> ON AIR bug while Program is open</label>
+    </div></form></dialog>
+  <div class="visual-stage" id="visualStage" aria-hidden="true" hidden><canvas id="visualCanvas"></canvas><div class="visual-bar"><button type="button" data-visual="spectrum">Spectrum</button><button type="button" data-visual="wave">Wave</button><button type="button" data-visual="orbit">Orbit</button><button type="button" id="visualCloseBtn">Close · Esc</button></div></div>
   <script src="studio-core.js"></script>
   <script src="ctr-studio-v2.js"></script>
 </body>

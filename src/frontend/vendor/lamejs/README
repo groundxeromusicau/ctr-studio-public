@@ -1,0 +1,3 @@
+lamejs (@breezystack/lamejs 1.2.7), unmodified: https://github.com/breezystack/lamejs
+Licensed under the LGPL-3.0 (COPYING.LESSER, which builds on COPYING; LAME-USAGE.txt is its note on use). It is loaded as its own file only when
+streaming MP3, so you can replace it with any compatible build.

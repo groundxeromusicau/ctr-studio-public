@@ -1,16 +1,17 @@
 {
   "name": "ctr-studio",
-  "version": "2.0.0-alpha.4",
+  "version": "2.1.0",
   "description": "CTR Studio Open - a local-first show builder and live radio workspace.",
   "main": "main.js",
   "scripts": {
     "start": "node scripts/start-electron.js",
     "dev": "node src/backend/server.js",
-    "test": "node scripts/core-test.js && node scripts/ci-smoke.js",
+    "test": "node scripts/core-test.js && node scripts/icecast-test.js && node scripts/ci-smoke.js",
     "package": "electron-builder --publish never",
     "package:mac": "electron-builder --mac --publish never",
     "package:win": "electron-builder --win --publish never",
-    "package:linux": "electron-builder --linux --publish never"
+    "package:linux": "electron-builder --linux --publish never",
+    "release:mac": "sh scripts/release-mac.sh"
   },
   "keywords": [
     "radio",
@@ -42,7 +43,7 @@
   "build": {
     "appId": "au.groundxeromusic.ctrstudioopen",
     "productName": "CTR Studio Open",
-    "copyright": "Copyright © Ground Xero Music Australia",
+    "copyright": "Copyright \u00a9 Ground Xero Music Australia",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -50,6 +51,7 @@
     "files": [
       "main.js",
       "preload.js",
+      "desktop/**/*",
       "scripts/load-env.js",
       "src/frontend/**/*",
       "package.json",
@@ -60,7 +62,7 @@
         "provider": "github",
         "owner": "groundxeromusicau",
         "repo": "ctr-studio-public",
-        "releaseType": "release"
+        "releaseType": "draft"
       }
     ],
     "mac": {

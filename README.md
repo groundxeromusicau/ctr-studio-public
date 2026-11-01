@@ -1,10 +1,10 @@
-# CTR Studio Open — Version 2.0 Alpha
+# CTR Studio Open — Version 2.1
 
 **Build your show. Then go live.**
 
-CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.0 Alpha 4**. It combines a persistent music library, assisted show building, a two-deck live desk, microphone input, local recording, shuffle and repeat-safe automatic playback in an installable web application.
+CTR Studio Open is a free, local-first radio and DJ workspace from **Ground Xero Music Australia**. The current release is **Version 2.1**. It combines a persistent music library, assisted show building, a two-deck live desk with EQ and loops, microphone input, local recording, MIDI control, shuffle and repeat-safe automatic playback. Run it in the browser, or as a desktop app for Mac, Windows and Linux that also streams to Icecast and feeds an OBS overlay.
 
-[Open the public website](https://ctr-studio-open.vercel.app/) · [Launch the studio](https://ctr-studio-open.vercel.app/studio.html)
+[Open the public website](https://ctr-studio-open.vercel.app/) · [Launch the studio](https://ctr-studio-open.vercel.app/studio.html) · [Download the desktop app](https://github.com/groundxeromusicau/ctr-studio-public/releases/latest)
 
 ## Why local-first?
 
@@ -32,6 +32,20 @@ Browser storage is not a replacement for the original music files or a separate 
 - Installable progressive web application
 - Offline application shell
 - Responsive desktop and mobile layouts
+- Three-band EQ (double-click a slider to reset) and loop on both decks; click a waveform to jump
+- Silence alert after 10 seconds of dead air on Program; with Auto DJ on, the next track starts
+- MIDI Learn for decks, loops, mix, crossfader, master, EQ, mic, Program, Auto DJ, record and visuals, with lit buttons that follow the studio
+- Full-screen spectrum, wave and orbit visuals (V)
+
+## Desktop app (Mac, Windows, Linux)
+
+The same studio, plus what a browser can't do:
+
+- **Go live:** stream the Program output to Icecast or SHOUTcast v2 in MP3 (LAME) or Opus/WebM, with now-playing metadata, listener counts and automatic reconnection. The password is kept with the system keychain.
+- **OBS overlay:** a browser source at `http://127.0.0.1:4810/` with a now-playing lower third and an ON AIR bug, on a transparent background. It only listens on this computer.
+- Your library and settings stay put between launches (the studio is served from its own `ctr://studio` address), it updates itself from GitHub releases, and it asks before quitting while you're on air.
+
+Download it from [the latest release](https://github.com/groundxeromusicau/ctr-studio-public/releases/latest).
 
 ## Quick start
 
@@ -48,11 +62,13 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-To run the Electron wrapper:
+To run the desktop app from source:
 
 ```bash
 npm start
 ```
+
+To build it: `npm run package:mac`, `package:win` or `package:linux` (into `release/`). Releases: push a `v*` tag and the Desktop release workflow builds Windows and Linux into a draft release; `npm run release:mac` adds the signed and notarised Mac build; then publish the draft.
 
 ## Testing
 
@@ -60,13 +76,15 @@ npm start
 npm test
 ```
 
-The smoke test starts the local server, checks the V2 health response, verifies the marketing and studio routes, and confirms required PWA assets are available.
+The core tests cover show building, playback selection, MIDI, the silence alert and stream settings; the Icecast test runs the desktop app's source client against a stand-in server; the smoke test starts the local server, checks the health response, verifies the marketing and studio routes, and confirms required assets are available.
 
 ## Project layout
 
 ```text
 .
-├── main.js                         Electron launcher
+├── main.js                         Desktop app: the ctr://studio window, permissions, updates
+├── preload.js                      The studio's bridge to streaming and the overlay
+├── desktop/                        Icecast source client and the OBS overlay server
 ├── server.js                       Vercel/server entry point
 ├── scripts/                        Startup and smoke-test scripts
 ├── src/
@@ -78,6 +96,9 @@ The smoke test starts the local server, checks the V2 health response, verifies 
 │       ├── ctr-studio-v2.css       Studio styles
 │       ├── studio-core.js          Tested show-building and playback selection logic
 │       ├── ctr-studio-v2.js        Library, rundown, audio, and PWA logic
+│       ├── ctr-open-tools.css      EQ, MIDI, streaming, overlay and visuals styles
+│       ├── overlay/                The OBS overlay page
+│       ├── vendor/lamejs/          MP3 encoder (LGPL-3.0), loaded only to stream MP3
 │       ├── service-worker.js       Offline application shell
 │       └── manifest.webmanifest    Install metadata
 ├── CONTRIBUTING.md
@@ -86,6 +107,10 @@ The smoke test starts the local server, checks the V2 health response, verifies 
 ├── TRADEMARKS.md
 └── LICENSE
 ```
+
+## Third-party software
+
+MP3 streaming uses [lamejs](https://github.com/breezystack/lamejs) (LGPL-3.0), shipped unmodified as its own file in `src/frontend/vendor/lamejs/` with its licence, and loaded only when you stream MP3, so it can be replaced with any compatible build.
 
 ## Contributing
 

@@ -16,4 +16,3 @@ data/overlay-token.txt
 .vercel
 .env*
 release/
-.DS_Store

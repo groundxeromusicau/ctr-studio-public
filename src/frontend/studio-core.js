@@ -35,5 +35,36 @@
     return pool.slice(index + 1).find(track => candidates.includes(track)) || candidates[0];
   }
 
-  return { sanitizeQueue, buildBalancedQueue, selectNext };
+  // MIDI: note on/off and control change only; note on with velocity 0 is a release.
+  function parseMidi(data) {
+    const [status = 0, data1 = 0, data2 = 0] = data || [], command = status & 0xf0, channel = (status & 0x0f) + 1;
+    if (command === 0xb0) return { type: 'cc', channel, data1, value: data2 };
+    if (command === 0x90 || command === 0x80) return { type: 'note', channel, data1, value: command === 0x80 ? 0 : data2 };
+    return null;
+  }
+
+  // A button fires once per press: a note rising from 0, or a CC crossing 64 upwards.
+  function midiPressed(type, value, previous = 0) {
+    return type === 'note' ? value > 0 && previous === 0 : value >= 64 && previous < 64;
+  }
+
+  // Silence on air: nothing playing, no mic, Program open. Alerts once, after `limit` ms.
+  function silenceWatch(since, { program, playing, mic, now, limit = 10000 }) {
+    if (!program || playing || mic) return { since: null, alert: false };
+    const start = since ?? now;
+    return { since: start, alert: now - start >= limit };
+  }
+
+  // Icecast source settings, cleaned up; `error` says what's missing.
+  function streamSettings(value = {}) {
+    const host = String(value.host || '').trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+    const port = Math.round(Number(value.port) || 8000), mountRaw = String(value.mount || '/stream').trim();
+    const mount = mountRaw.startsWith('/') ? mountRaw : `/${mountRaw}`, format = value.format === 'opus' ? 'opus' : 'mp3';
+    const kbps = [64, 96, 128, 160, 192, 256, 320].includes(Number(value.kbps)) ? Number(value.kbps) : 128;
+    const settings = { host, port, mount, user: String(value.user || 'source').trim() || 'source', format, kbps, name: String(value.name || '').slice(0, 80), genre: String(value.genre || '').slice(0, 40) };
+    const error = !host ? 'Enter the server address' : !(port > 0 && port < 65536) ? 'Enter a port between 1 and 65535' : !/^\/[\w.\-/]+$/.test(mount) ? 'Mount points use letters, numbers, dots, dashes and slashes' : null;
+    return { settings, error };
+  }
+
+  return { sanitizeQueue, buildBalancedQueue, selectNext, parseMidi, midiPressed, silenceWatch, streamSettings };
 }));

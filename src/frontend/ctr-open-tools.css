@@ -1,0 +1,45 @@
+/* Version 2.1: deck EQ and loop, click-to-seek waveforms, the silence alert, MIDI, going live and the visuals. */
+.live-head{grid-template-columns:1fr repeat(7,auto);gap:8px}
+.live-head>#visualsBtn,.live-head>#midiBtn{font:600 9px DM Mono}
+#streamBtn.live{border-color:var(--red);color:#fff;background:#2b1015}#streamBtn.live b{color:var(--red)}
+#streamBtn.trouble b{color:var(--orange)}
+.waveform{cursor:pointer}
+.deck-tools{display:grid;grid-template-columns:repeat(3,1fr) 62px;gap:8px;align-items:end;margin-top:14px}
+.deck-tools label{display:flex;flex-direction:column;gap:5px;font:500 7px DM Mono;letter-spacing:1px;color:#74777c}
+.deck-tools input{width:100%;accent-color:var(--lime)}
+.deck-tools button{font:600 8px DM Mono;padding:8px 6px}
+.deck-tools button.active{border-color:var(--lime);color:var(--lime);box-shadow:0 0 12px rgba(223,255,0,.12)}
+.silence-alert{display:flex;gap:14px;align-items:center;margin:-4px 0 12px;padding:12px 18px;border:1px solid var(--red);border-radius:6px;background:#2b1015;color:#ffd6db;font-size:12px;animation:alarm 1.2s ease-in-out infinite}
+.silence-alert b{font:700 10px DM Mono;letter-spacing:1.5px;color:#fff}
+.silence-alert[hidden]{display:none}
+@keyframes alarm{50%{background:#3d1219}}
+.dialog-note{color:#8a8d93;font-size:11px;line-height:1.55;margin:12px 0}
+.dialog-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.dialog-actions button{font:600 10px DM Mono}
+#midiDialog,#streamDialog{width:min(620px,calc(100% - 30px))}
+.midi-last{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:#0f1114;font:500 9px DM Mono;color:#74777c}
+.midi-last b{color:var(--lime);font-weight:500}
+.midi-list{max-height:330px;overflow:auto;margin-top:12px;border:1px solid var(--line2);border-radius:6px}
+.midi-row{display:grid;grid-template-columns:1fr 130px 70px;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line2);font-size:12px}
+.midi-row:last-child{border:0}
+.midi-row code{font:500 9px DM Mono;color:#9a9ca1}
+.midi-row button{font:600 8px DM Mono;padding:7px}
+.midi-row button.learning{border-color:var(--lime);color:var(--lime);animation:alarm 1s infinite}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.form-grid label,dialog .check{display:flex;flex-direction:column;gap:5px;font:500 8px DM Mono;letter-spacing:.8px;color:#8a8d93}
+.form-grid .wide{grid-column:span 3}
+.form-grid input,.form-grid select{padding:9px;background:#0b0d10;border:1px solid #2b2e34;border-radius:5px;color:var(--ink);font:13px Manrope,system-ui,sans-serif}
+dialog .check{flex-direction:row;align-items:center;gap:8px;margin:8px 0;font-size:10px}
+.overlay-head{margin-top:26px;font-size:20px!important}
+.overlay-url{display:flex;gap:8px;align-items:center}
+.overlay-url code{flex:1;padding:10px;border:1px solid var(--line);border-radius:5px;background:#0b0d10;font:500 11px DM Mono;color:var(--lime);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link-button{display:inline-block;text-decoration:none;text-align:center}
+.visual-stage{position:fixed;inset:0;z-index:40;background:#030405}
+.visual-stage[hidden]{display:none}
+.visual-stage canvas{width:100%;height:100%;display:block}
+.visual-bar{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);display:flex;gap:6px;padding:6px;border-radius:8px;background:rgba(9,10,12,.7);backdrop-filter:blur(10px);opacity:.25;transition:opacity .3s}
+.visual-stage:hover .visual-bar,.visual-bar:focus-within{opacity:1}
+.visual-bar button{font:600 9px DM Mono}
+.visual-bar button.active{border-color:var(--lime);color:var(--lime)}
+@media (max-width:1200px){.live-head{grid-template-columns:repeat(4,auto);justify-content:start}.live-head>div:first-child{grid-column:1/-1}}
+@media (max-width:640px){.form-grid{grid-template-columns:1fr 1fr}.form-grid .wide{grid-column:span 2}.deck-tools{grid-template-columns:repeat(3,1fr)}.deck-tools button{grid-column:span 3}}

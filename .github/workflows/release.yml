@@ -1,0 +1,35 @@
+# Builds the Windows and Linux desktop apps when a version tag (v2.1.0, ...) is
+# pushed, into a draft GitHub release. The Mac build is signed and notarised on
+# the Mac with `npm run release:mac`, which adds it to the same draft. Publish
+# the draft when every platform is there; the apps then update themselves.
+name: Desktop release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target: --win
+          - os: ubuntu-latest
+            target: --linux
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.x
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx electron-builder ${{ matrix.target }} --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

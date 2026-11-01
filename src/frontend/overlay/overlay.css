@@ -1,0 +1,12 @@
+/* Transparent for OBS: only the bug and the lower third draw. Sized for a 1920x1080 browser source. */
+html,body{margin:0;background:transparent;overflow:hidden;font-family:Manrope,system-ui,sans-serif}
+.bug{position:fixed;top:48px;right:56px;display:flex;align-items:center;gap:12px;padding:12px 20px;border-radius:6px;background:rgba(9,10,12,.86);border:1px solid rgba(239,67,84,.7);color:#fff;font:700 22px/1 ui-monospace,Menlo,monospace;letter-spacing:3px;box-shadow:0 0 30px rgba(239,67,84,.25)}
+.bug i{width:14px;height:14px;border-radius:50%;background:#ef4354;box-shadow:0 0 14px #ef4354;animation:pulse 1.6s ease-in-out infinite}
+.lower-third{position:fixed;left:72px;bottom:72px;min-width:520px;max-width:62vw;padding:22px 30px 24px;border-left:6px solid #dfff00;border-radius:0 8px 8px 0;background:linear-gradient(100deg,rgba(9,10,12,.92),rgba(17,19,23,.82));color:#f3f1e9;box-shadow:0 20px 50px rgba(0,0,0,.45);transform:translateX(-40px);opacity:0;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .5s}
+.lower-third.show{transform:none;opacity:1}
+.lower-third span{display:block;font:600 15px/1 ui-monospace,Menlo,monospace;letter-spacing:3px;color:#dfff00}
+.lower-third b{display:block;margin-top:12px;font-size:42px;line-height:1.1;letter-spacing:-1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lower-third small{display:block;margin-top:6px;font-size:24px;color:#b9bbc0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+[hidden]{display:none!important}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.lower-third{transition:none}.bug i{animation:none}}
