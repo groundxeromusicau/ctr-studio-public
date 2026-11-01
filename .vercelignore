@@ -1,0 +1,7 @@
+# The website deploy needs the server and src/frontend only.
+release/
+build/
+desktop/
+.github/
+.env*
+*.dmg
