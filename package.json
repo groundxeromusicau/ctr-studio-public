@@ -6,7 +6,11 @@
   "scripts": {
     "start": "node scripts/start-electron.js",
     "dev": "node src/backend/server.js",
-    "test": "node scripts/core-test.js && node scripts/ci-smoke.js"
+    "test": "node scripts/core-test.js && node scripts/ci-smoke.js",
+    "package": "electron-builder --publish never",
+    "package:mac": "electron-builder --mac --publish never",
+    "package:win": "electron-builder --win --publish never",
+    "package:linux": "electron-builder --linux --publish never"
   },
   "keywords": [
     "radio",
@@ -22,7 +26,104 @@
   "license": "MPL-2.0",
   "type": "commonjs",
   "dependencies": {
-    "electron": "^42.2.0",
+    "electron-updater": "6.8.11",
     "express": "^5.2.1"
+  },
+  "productName": "CTR Studio Open",
+  "homepage": "https://ctr-studio-open.vercel.app/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/groundxeromusicau/ctr-studio-public.git"
+  },
+  "devDependencies": {
+    "electron": "42.11.18",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "au.groundxeromusic.ctrstudioopen",
+    "productName": "CTR Studio Open",
+    "copyright": "Copyright © Ground Xero Music Australia",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "scripts/load-env.js",
+      "src/frontend/**/*",
+      "package.json",
+      "LICENSE"
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "groundxeromusicau",
+        "repo": "ctr-studio-public",
+        "releaseType": "release"
+      }
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.music",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "CTR Studio Open uses your microphone or audio interface to put you on air."
+      },
+      "hardenedRuntime": true,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": true
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "AudioVideo",
+      "synopsis": "Free radio and DJ workspace: build your show, then go live.",
+      "maintainer": "Ground Xero Music Australia"
+    },
+    "deb": {
+      "depends": [
+        "libnotify4",
+        "libnss3",
+        "libxss1",
+        "libxtst6",
+        "xdg-utils"
+      ]
+    }
+  },
+  "allowScripts": {
+    "electron@42.11.18": true,
+    "electron-winstaller@5.4.0": true
   }
 }
